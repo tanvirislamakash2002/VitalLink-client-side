@@ -1,11 +1,11 @@
 import React from 'react'
 
-function DoctorDashboardPage() {
+function DoctorsDashboardPage() {
   return (
     <div>
-      DoctorDashboardPage
+      DoctorsDashboardPage
     </div>
   )
 }
 
-export default DoctorDashboardPage
+export default DoctorsDashboardPage
