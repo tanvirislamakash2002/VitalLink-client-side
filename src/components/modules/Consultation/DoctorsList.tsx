@@ -1,11 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client"
+import { getDoctors } from '@/src/app/(commonLayout)/consultation/_actions'
+import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 
 function DoctorsList() {
-  return (
-    <div>
-      this is doctor list component
-    </div>
-  )
+    const { data } = useQuery({
+        queryKey: ["doctors"],
+        queryFn: () => getDoctors()
+    })
+
+    return (
+        <div>
+            {data.data.map((doctor: any) => (
+                <div key={doctor.id}>{doctor.name}</div>
+            ))}
+        </div>
+    )
 }
 
 export default DoctorsList
