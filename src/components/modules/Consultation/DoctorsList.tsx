@@ -9,7 +9,7 @@ function DoctorsList() {
         queryKey: ["doctors"],
         queryFn: () => getDoctors()
     })
-
+    if (!data) return
     return (
         <div>
             {data.data.map((doctor: any) => (
