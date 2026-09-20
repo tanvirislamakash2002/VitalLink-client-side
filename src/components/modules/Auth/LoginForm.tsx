@@ -1,3 +1,4 @@
+"use client"
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { loginAction } from '@/src/app/(commonLayout)/(authRouteGroup)/login/_action';
 import { ILoginPayload, loginZodSchema } from '@/src/zod/auth.validation';
@@ -13,7 +14,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import AppSubmitButton from '../../shared/form/AppSubmitButton';
 
 const LoginForm = () => {
-    const queryClient = useQueryClient();
+    // const queryClient = useQueryClient();
 
     const [serverError, setServerError] = useState<string | null>(null)
     const [showPassword, setShowPassword] = useState(false)
@@ -96,8 +97,10 @@ const LoginForm = () => {
                                     aria-label={
                                         showPassword ? "Hide password" : "Show password"
                                     }
+                                    className='cursor-pointer'
                                     append={
                                         <Button
+                                            type='button'
                                             onClick={() => setShowPassword((value) => !value)}
                                             variant="ghost"
                                             size="icon"
@@ -131,7 +134,8 @@ const LoginForm = () => {
                         {
                             ([canSubmit, isSubmitting]) => (
                                 <AppSubmitButton
-                                    isPending={isSubmitting}
+                                    isPending={isSubmitting || isPending}
+                                    pendingLabel="logging In..."
                                     disabled={!canSubmit}
                                 >
                                     Log In

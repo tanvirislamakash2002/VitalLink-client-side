@@ -29,6 +29,9 @@ export const loginAction = async (payload: ILoginPayload): Promise<ILoginRespons
         redirect("/dashboard")
 
     } catch (error: any) {
+        if (error && typeof error === "object" && "digest" in error && typeof error.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")) {
+            throw error;
+        }
         return {
             success: false,
             message: `Login failed: ${error.message}`
