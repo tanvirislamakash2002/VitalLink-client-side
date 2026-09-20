@@ -4,10 +4,13 @@ import { ILoginPayload, loginZodSchema } from '@/src/zod/auth.validation';
 import { useForm } from '@tanstack/react-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../ui/card';
 import AppField from '../../shared/form/AppField';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import AppSubmitButton from '../../shared/form/AppSubmitButton';
 
 const LoginForm = () => {
     const queryClient = useQueryClient();
@@ -106,8 +109,69 @@ const LoginForm = () => {
                             )
                         }
                     </form.Field>
+
+                    <div className="text-right mt-2">
+                        <Link
+                            href="/forgot-password"
+                            className='text-sm text-primary hover:underline underline-offset-4'>
+                            Forgot password?
+                        </Link>
+                    </div>
+
+                    {serverError && (
+                        <Alert
+                            variant={"destructive"}>
+                            <AlertDescription>
+                                {serverError}
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                    <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting] as const}>
+                        {
+                            ([canSubmit, isSubmitting]) => (
+                                <AppSubmitButton
+                                    isPending={isSubmitting}
+                                    disabled={!canSubmit}
+                                >
+                                    Log In
+                                </AppSubmitButton>
+                            )
+                        }
+                    </form.Subscribe>
                 </form>
+
+                <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                    </div>
+                </div>
+
+                <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+                        window.location.href = `${baseUrl}/auth/login/google`
+                    }}
+                >
+                    G  Sign in with Google
+                </Button>
             </CardContent>
+            <CardFooter className='justify-center border-t pt-4'>
+                <p className='text-sm text-muted-foreground'>
+                    Don&apos;t have an account?{" "}
+                    <Link
+                        href="/register"
+                        className='text-primary font-medium hover:underline underline-offset-4'
+                    >
+                        Sign Up for an account
+                    </Link>
+                </p>
+            </CardFooter>
         </Card>
     );
 };
