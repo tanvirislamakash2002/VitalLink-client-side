@@ -114,12 +114,32 @@ export async function proxy(request: NextRequest) {
             return NextResponse.redirect(loginUrl)
         }
 
-        // Rule - 5 : User trying to access common protected route -> allow
+        // Rule - 5 : Enforcing user to stay in reset password or verify email page if their needPasswordChange or is EmailVerified flags are not satisfied  respectively
+        if (accessToken) {
+            const userInfo = await getUserInfo();
+
+            // need password change scenario
+            if (userInfo.needPasswordChange) {
+                if (pathname !== "/reset-password") {
+                    const resetPasswordUrl = new URL("/reset-password", request.url)
+                    resetPasswordUrl.searchParams.set("email", userInfo.email);
+                    return NextResponse.redirect(resetPasswordUrl)
+                }
+
+                return NextResponse.next()
+            }
+
+            if (userInfo && !userInfo.needPasswordChange && pathname === "/reset-password") {
+                return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url))
+            }
+        }
+
+        // Rule - 6 : User trying to access common protected route -> allow
         if (routerOwner === "COMMON") {
             return NextResponse.next()
         }
 
-        // Rule - 6 : User trying to visit role based protected but doesn't have required role -> redirect to their default dashboard
+        // Rule - 7 : User trying to visit role based protected but doesn't have required role -> redirect to their default dashboard
         if (routerOwner === "ADMIN" || routerOwner === "DOCTOR" || routerOwner === "PATIENT") {
             if (routerOwner !== userRole) {
                 return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url))
