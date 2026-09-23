@@ -1,5 +1,6 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import jwt, { JwtPayload } from "jsonwebtoken"
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 const verifyToken = (token: string, secret: string) => {
     try {
@@ -18,11 +19,12 @@ const verifyToken = (token: string, secret: string) => {
 }
 
 const decodedToken = (token: string) => {
-    const decoded = jwt.decode(token) as JwtPayload
-    return decoded
+    const decoded = jwt.decode(token) as JwtPayload;
+    return decoded;
 }
+
 
 export const jwtUtils = {
     verifyToken,
-    decodedToken
+    decodedToken,
 }
