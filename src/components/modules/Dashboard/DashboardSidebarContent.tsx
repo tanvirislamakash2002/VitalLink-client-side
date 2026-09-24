@@ -2,9 +2,9 @@
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { getIconComponent } from '@/src/lib/iconMapper';
-import { NavSection } from '@/src/types/dashboard.types';
-import { UserInfo } from '@/src/types/user.types';
+import { getIconComponent } from '@/lib/iconMapper';
+import { NavSection } from '@/types/dashboard.types';
+import { UserInfo } from '@/types/user.types';
 import { cn } from 'cn';
 import { Home } from 'lucide-react';
 import Link from 'next/link';

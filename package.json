@@ -9,8 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@base-ui/react": "^1.8.0",
     "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-dropdown-menu": "^2.1.24",
+    "@radix-ui/react-scroll-area": "^1.2.18",
+    "@radix-ui/react-separator": "^1.1.15",
     "@tanstack/react-devtools": "^0.10.12",
     "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-form-devtools": "^0.2.34",
@@ -20,9 +22,11 @@
     "axios": "^1.20.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",
+    "date-fns": "^4.4.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.47.0",
     "next": "16.3.5",
+    "radix-ui": "^1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "shadcn": "^4.21.0",
@@ -32,6 +36,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tanstack/eslint-plugin-query": "^5.102.8",
+    "@types/date-fns": "^2.5.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",

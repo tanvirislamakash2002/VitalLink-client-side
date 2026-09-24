@@ -1,7 +1,7 @@
-import { getDefaultDashboardRoute } from '@/src/lib/authUtils';
-import { getNavItemsByRole } from '@/src/lib/navItems';
-import { getUserInfo } from '@/src/services/auth.services';
-import { NavSection } from '@/src/types/dashboard.types';
+import { getDefaultDashboardRoute } from '@/lib/authUtils';
+import { getNavItemsByRole } from '@/lib/navItems';
+import { getUserInfo } from '@/services/auth.services';
+import { NavSection } from '@/types/dashboard.types';
 import React from 'react';
 import DashboardNavbarContent from './DashboardNavbarContent';
 
