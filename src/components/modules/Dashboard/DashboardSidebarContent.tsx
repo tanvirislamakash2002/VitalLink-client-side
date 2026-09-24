@@ -1,6 +1,7 @@
 "use client"
 
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getIconComponent } from '@/src/lib/iconMapper';
 import { NavSection } from '@/src/types/dashboard.types';
 import { UserInfo } from '@/src/types/user.types';
 import { cn } from 'cn';
@@ -42,7 +43,7 @@ const DashboardSidebarContent = ({ dashboardHome, navItems, userInfo }: Dashboar
                                     {
                                         section.items.map((item, id) => {
                                             const isActive = pathname === item.href
-                                            // const Icon = <Home />
+                                            const Icon = getIconComponent(item.icon)
 
                                             return (
                                                 <Link
@@ -56,7 +57,7 @@ const DashboardSidebarContent = ({ dashboardHome, navItems, userInfo }: Dashboar
                                                         )
                                                     }
                                                 >
-                                                    <Home />
+                                                    <Icon />
                                                     <span>{item.title}</span>
                                                 </Link>
                                             )
