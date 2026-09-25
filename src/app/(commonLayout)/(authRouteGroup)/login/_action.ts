@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getDefaultDashboardRoute, isValidRedirectForRole, UserRole } from "@/src/lib/authUtils";
-import { httpClient } from "@/src/lib/axios/httpClient";
-import { setTokenInCookies } from "@/src/lib/tokenUtils";
-import { ApiErrorResponse } from "@/src/types/api.types";
-import { ILoginResponse } from "@/src/types/auth.types";
-import { ILoginPayload, loginZodSchema } from "@/src/zod/auth.validation";
+import { getDefaultDashboardRoute, isValidRedirectForRole, UserRole } from "@/lib/authUtils";
+import { httpClient } from "@/lib/axios/httpClient";
+import { setTokenInCookies } from "@/lib/tokenUtils";
+import { ApiErrorResponse } from "@/types/api.types";
+import { ILoginResponse } from "@/types/auth.types";
+import { ILoginPayload, loginZodSchema } from "@/zod/auth.validation";
 import { redirect } from "next/navigation";
 
 export const loginAction = async (payload : ILoginPayload, redirectPath ?: string ) : Promise<ILoginResponse | ApiErrorResponse> =>{

@@ -1,4 +1,4 @@
-import LoginForm from '@/src/components/modules/Auth/LoginForm'
+import LoginForm from '@/components/modules/Auth/LoginForm'
 import React from 'react'
 
 interface LoginParams {

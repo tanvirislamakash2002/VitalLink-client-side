@@ -1,5 +1,5 @@
 "use server"
-import { httpClient } from "@/src/lib/axios/httpClient"
+import { httpClient } from "@/lib/axios/httpClient"
 
 interface IDoctor {
     id: number;

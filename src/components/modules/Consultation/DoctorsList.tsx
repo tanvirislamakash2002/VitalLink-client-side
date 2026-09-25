@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
-import { getDoctors } from '@/src/app/(commonLayout)/consultation/_actions'
+import { getDoctors } from '@/app/(commonLayout)/consultation/_actions'
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 

@@ -9,6 +9,7 @@ import DashboardMobileSidebar from './DashboardMobileSidebar';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import NotificationDropdown from './NotificationDropdown';
+import UserDropdown from './UserDropdown';
 
 interface DashboardNavbarProps {
     userInfo: UserInfo;
@@ -43,9 +44,9 @@ const DashboardNavbarContent = ({ dashboardHome, navItems, userInfo }: Dashboard
 
             {/* Notification */}
             <NotificationDropdown />
-            
-            {/* User Dropdown */}
 
+            {/* User Dropdown */}
+            <UserDropdown userInfo={userInfo} />
         </>
     );
 };

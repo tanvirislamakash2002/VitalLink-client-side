@@ -1,6 +1,6 @@
 "use server";
 
-import { setTokenInCookies } from "@/src/lib/tokenUtils";
+import { setTokenInCookies } from "@/lib/tokenUtils";
 import { cookies } from "next/headers";
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;

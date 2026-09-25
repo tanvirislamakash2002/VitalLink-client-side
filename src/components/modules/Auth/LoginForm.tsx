@@ -1,7 +1,7 @@
 "use client"
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { loginAction } from '@/src/app/(commonLayout)/(authRouteGroup)/login/_action';
-import { ILoginPayload, loginZodSchema } from '@/src/zod/auth.validation';
+import { loginAction } from '@/app/(commonLayout)/(authRouteGroup)/login/_action';
+import { ILoginPayload, loginZodSchema } from '@/zod/auth.validation';
 import { useForm } from '@tanstack/react-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
