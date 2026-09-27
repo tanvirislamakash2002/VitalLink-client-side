@@ -2,11 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { format } from 'date-fns';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-
-interface BarChartData {
-    month: Date | string,
-    count: number
-}
+import { BarChartData } from '@/types/dashboard.types';
 
 interface AppointmentBarChartProps {
     data: BarChartData[]
