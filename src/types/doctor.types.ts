@@ -18,6 +18,8 @@ export interface IDoctor {
     qualification: string;
     currentWorkingPlace: string;
     designation: string;
+    averageRating: number;
+    createdAt: string;
     specialties: Array<{
         specialtyId: string;
         doctorId: string;
