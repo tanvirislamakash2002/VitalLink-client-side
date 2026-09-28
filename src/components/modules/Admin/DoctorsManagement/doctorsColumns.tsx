@@ -1,4 +1,5 @@
 import DateCell from "@/components/shared/cell/DateCell";
+import StatusBadgeCell from "@/components/shared/cell/StatusBadgeCell";
 import UserInfoCell from "@/components/shared/cell/UserInfoCell";
 import { IDoctor } from "@/types/doctor.types";
 import { ColumnDef } from "@tanstack/react-table";
@@ -8,7 +9,7 @@ export const doctorColumns: ColumnDef<IDoctor>[] = [
     {
         id: "name",
         accessorKey: "name",
-        header: "Name",
+        header: "Doctor",
         cell: ({ row }) => (
             <UserInfoCell
                 name={row.original.name}
@@ -79,6 +80,16 @@ export const doctorColumns: ColumnDef<IDoctor>[] = [
                 <span className="text-sm capitalize">
                     {row.original.gender.toLowerCase()}
                 </span>
+            )
+        }
+    },
+    {
+        id: "status",
+        accessorKey: "user.status",
+        header: "Status",
+        cell: ({ row }) => {
+            return (
+                <StatusBadgeCell status={row.original.user.status} />
             )
         }
     },
