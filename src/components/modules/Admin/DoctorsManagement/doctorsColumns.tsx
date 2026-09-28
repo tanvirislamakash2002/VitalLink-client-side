@@ -1,4 +1,5 @@
 import DateCell from "@/components/shared/cell/DateCell";
+import UserInfoCell from "@/components/shared/cell/UserInfoCell";
 import { IDoctor } from "@/types/doctor.types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Star } from "lucide-react";
@@ -7,7 +8,14 @@ export const doctorColumns: ColumnDef<IDoctor>[] = [
     {
         id: "name",
         accessorKey: "name",
-        header: "Name"
+        header: "Name",
+        cell: ({ row }) => (
+            <UserInfoCell
+                name={row.original.name}
+                email={row.original.email}
+                profilePhoto={row.original.profilePhoto}
+            />
+        )
     },
     {
         id: "contactNumber",
