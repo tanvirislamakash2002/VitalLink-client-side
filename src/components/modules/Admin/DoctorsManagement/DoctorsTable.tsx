@@ -21,40 +21,40 @@ const DoctorsTable = () => {
 
     const { data: doctors } = doctorDataResponse! || []
 
-    const { getHeaderGroups, getRowModel } = useReactTable({
-        data: doctors,
-        columns: doctorColumns,
-        getCoreRowModel: getCoreRowModel()
-    })
+    // const { getHeaderGroups, getRowModel } = useReactTable({
+    //     data: doctors,
+    //     columns: doctorColumns,
+    //     getCoreRowModel: getCoreRowModel()
+    // })
 
     return (
-        <Table>
-            <TableHeader>
-                {getHeaderGroups().map((hg) => (
-                    <TableRow key={hg.id}>
-                        {hg.headers.map((header) => (
-                            <TableHead key={header.id}>
-                                {flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                )}
-                            </TableHead>
-                        ))}
-                    </TableRow>
-                ))}
-            </TableHeader>
-            <TableBody>
-                {getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                        {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id}>
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+        // <Table>
+        //     <TableHeader>
+        //         {getHeaderGroups().map((hg) => (
+        //             <TableRow key={hg.id}>
+        //                 {hg.headers.map((header) => (
+        //                     <TableHead key={header.id}>
+        //                         {flexRender(
+        //                             header.column.columnDef.header,
+        //                             header.getContext()
+        //                         )}
+        //                     </TableHead>
+        //                 ))}
+        //             </TableRow>
+        //         ))}
+        //     </TableHeader>
+        //     <TableBody>
+        //         {getRowModel().rows.map((row) => (
+        //             <TableRow key={row.id}>
+        //                 {row.getVisibleCells().map((cell) => (
+        //                     <TableCell key={cell.id}>
+        //                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        //                     </TableCell>
+        //                 ))}
+        //             </TableRow>
+        //         ))}
+        //     </TableBody>
+        // </Table>
     );
 };
 
