@@ -1,3 +1,4 @@
+import DateCell from "@/components/shared/cell/DateCell";
 import { IDoctor } from "@/types/doctor.types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Star } from "lucide-react";
@@ -79,9 +80,7 @@ export const doctorColumns: ColumnDef<IDoctor>[] = [
         header: "Joined On",
         cell: ({ row }) => {
             return (
-                <span className="text-sm capitalize">
-                    {row.original.createdAt}
-                </span>
+                <DateCell date={row.original.createdAt} formatString="MMM dd, yyyy" />
             )
         }
     },

@@ -19,7 +19,7 @@ export interface IDoctor {
     currentWorkingPlace: string;
     designation: string;
     averageRating: number;
-    createdAt: string;
+    createdAt: Date;
     specialties: Array<{
         specialtyId: string;
         doctorId: string;
