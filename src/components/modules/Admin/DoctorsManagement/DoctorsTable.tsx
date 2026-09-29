@@ -3,15 +3,33 @@
 import DataTable from '@/components/shared/table/DataTable';
 import { getDoctors } from '@/services/doctor.services';
 import { IDoctor } from '@/types/doctor.types';
-import { SortingState } from '@tanstack/react-table';
+import { PaginationState, SortingState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useOptimistic, useTransition } from 'react';
 import { doctorColumns } from './doctorsColumns';
 
-const DoctorsTable = ({ queryString, queryParamsObject }: { queryString: string; queryParamsObject: { [key: string]: string | string[] | undefined } }) => {
+const DoctorsTable = () => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const queryString = searchParams.toString();
+    const pageParam = searchParams.get('page');
+    const limitParam = searchParams.get('limit');
+    const currentPage = Math.max(Number(pageParam) || 1, 1);
+    const currentLimit = Math.max(Number(limitParam) || 10, 1);
+    const [optimisticPagination, setOptimisticPagination] = useOptimistic<PaginationState | null, PaginationState>(
+        null,
+        (_, nextPagination) => nextPagination
+    );
+    const [isNavigationPending, startTransition] = useTransition();
+
+    const queryParamsObject = Object.fromEntries(
+        [...new Set(searchParams.keys())].map((key) => {
+            const values = searchParams.getAll(key);
+            return [key, values.length > 1 ? values : values[0]];
+        })
+    );
 
     const sortFieldByColumnId: Record<string, string> = {
         name: 'name',
@@ -32,12 +50,17 @@ const DoctorsTable = ({ queryString, queryParamsObject }: { queryString: string;
         ? [{ id: sortingColumnId, desc: sortOrderParam === 'desc' }]
         : [];
 
-    const { data: doctorDataResponse, isLoading } = useQuery({
+    const { data: doctorDataResponse, isFetching } = useQuery({
         queryKey: ["doctors", queryParamsObject],
-        queryFn: () => getDoctors(queryString)
+        queryFn: () => getDoctors(queryString),
+        staleTime: 1000 * 60 * 60,
     })
 
     const doctors = doctorDataResponse?.data ?? [];
+    const paginationState = optimisticPagination ?? {
+        pageIndex: (doctorDataResponse?.meta?.page ?? currentPage) - 1,
+        pageSize: doctorDataResponse?.meta?.limit ?? currentLimit,
+    };
 
     const handleSortingChange = (sorting: SortingState) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -51,9 +74,33 @@ const DoctorsTable = ({ queryString, queryParamsObject }: { queryString: string;
             params.delete('sortBy');
             params.delete('sortOrder');
         }
+        params.set('page', '1');
 
         const query = params.toString();
-        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+        const nextUrl = query ? `${pathname}?${query}` : pathname;
+        window.history.pushState(null, '', nextUrl);
+    };
+
+    const handlePaginationChange = (nextPagination: PaginationState) => {
+        const nextPageIndex = nextPagination.pageSize !== paginationState.pageSize
+            ? 0
+            : nextPagination.pageIndex;
+        const nextState = { ...nextPagination, pageIndex: nextPageIndex };
+
+        if (nextState.pageIndex === paginationState.pageIndex && nextState.pageSize === paginationState.pageSize) {
+            return;
+        }
+
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('page', String(nextState.pageIndex + 1));
+        params.set('limit', String(nextState.pageSize));
+
+        const query = params.toString();
+        const nextUrl = query ? `${pathname}?${query}` : pathname;
+        startTransition(() => {
+            setOptimisticPagination(nextState);
+            router.push(nextUrl, { scroll: false });
+        });
     };
 
     const handleView = (doctor: IDoctor) => {
@@ -106,7 +153,13 @@ const DoctorsTable = ({ queryString, queryParamsObject }: { queryString: string;
             data={doctors}
             columns={doctorColumns}
             sorting={{ state: sortingState, onSortingChange: handleSortingChange }}
-            isLoading={isLoading}
+            pagination={{
+                state: paginationState,
+                pageCount: Math.max(doctorDataResponse?.meta?.totalPages ?? 1, 1),
+                onPaginationChange: handlePaginationChange,
+                disabled: isFetching || isNavigationPending,
+            }}
+            isLoading={isFetching || isNavigationPending}
             emptyMessage='No doctors found.'
             actions={
                 {

@@ -1,9 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table';
+import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, PaginationState, SortingState, useReactTable } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from 'lucide-react';
 import React from 'react';
+import DataTablePagination from './DataTablePagination';
+
 
 interface DataTableActions<TData> {
     onView?: (data: TData) => void;
@@ -21,9 +23,15 @@ interface DataTableProps<TData> {
         state: SortingState;
         onSortingChange: (state: SortingState) => void
     }
+    pagination?: {
+        state: PaginationState;
+        pageCount: number;
+        onPaginationChange: (state: PaginationState) => void;
+        disabled?: boolean;
+    }
 }
 
-const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, sorting }: DataTableProps<TData>) => {
+const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, sorting, pagination }: DataTableProps<TData>) => {
 
     const tableColumns: ColumnDef<TData>[] = actions ? [...columns,
     {
@@ -70,14 +78,18 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, so
     }
     ] : columns
 
-    const { getHeaderGroups, getRowModel } = useReactTable({
+    const table = useReactTable({
         data,
         columns: tableColumns,
         getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         manualSorting: !!sorting,
+        manualPagination: !!pagination,
+        pageCount: pagination?.pageCount,
         state: {
-            ...sorting ? { sorting: sorting.state } : {}
+            ...(sorting ? { sorting: sorting.state } : {}),
+            ...(pagination ? { pagination: pagination.state } : {}),
         },
         onSortingChange: sorting ?
             (updater) => {
@@ -85,17 +97,24 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, so
                 const nextSortingState = typeof updater === "function" ? updater(currentSortingState) : updater;
                 sorting.onSortingChange(nextSortingState)
             }
+            : undefined,
+        onPaginationChange: pagination ?
+            (updater) => {
+                const currentPaginationState = pagination.state;
+                const nextPaginationState = typeof updater === "function" ? updater(currentPaginationState) : updater;
+                pagination.onPaginationChange(nextPaginationState)
+            }
             : undefined
     })
+            const { getHeaderGroups, getRowModel } = table
     return (
         <div className="relative">
             {
                 isLoading && (
                     <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center">
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent">
-                                <span className="text-sm text-muted-foreground">loading...</span>
-                            </div>
+                        <div role="status" aria-live="polite" className="flex items-center gap-2 rounded-md bg-background px-3 py-2 shadow-sm">
+                            <div aria-hidden="true" className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                            <span className="text-sm text-muted-foreground">Loading...</span>
                         </div>
                     </div>
                 )
@@ -162,6 +181,16 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, so
                     </TableBody>
                 </Table>
             </div>
+            {pagination && (
+                <DataTablePagination
+                    pageIndex={pagination.state.pageIndex}
+                    pageCount={pagination.pageCount}
+                    pageSize={pagination.state.pageSize}
+                    onPageChange={(pageIndex) => table.setPageIndex(pageIndex)}
+                    onPageSizeChange={(pageSize) => table.setPageSize(pageSize)}
+                    disabled={pagination.disabled}
+                />
+            )}
         </div>
     );
 };

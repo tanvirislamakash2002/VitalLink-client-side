@@ -10,15 +10,15 @@ const DoctorsManagementPage = async ({
 }) => {
   const queryParamsObjects = await searchParams;
 
-  const queryString = Object.keys(queryParamsObjects)
-    .map((key) => {
-      const value = queryParamsObjects[key]
-      if (Array.isArray(value)) {
-        return value.map((v) => `${key}=${v}`).join("&")
-      }
-      return `${key}=${value}`
-    })
-    .join("&")
+  const params = new URLSearchParams();
+  Object.entries(queryParamsObjects).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => params.append(key, item));
+    } else if (value !== undefined) {
+      params.set(key, value);
+    }
+  });
+  const queryString = params.toString();
 
   const queryClient = new QueryClient();
 
@@ -30,7 +30,7 @@ const DoctorsManagementPage = async ({
   })
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <DoctorsTable queryString={queryString} queryParamsObject={queryParamsObjects} />
+      <DoctorsTable />
     </HydrationBoundary>
   )
 }
