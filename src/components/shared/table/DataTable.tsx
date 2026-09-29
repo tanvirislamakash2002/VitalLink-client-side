@@ -183,6 +183,7 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, so
             </div>
             {pagination && (
                 <DataTablePagination
+                    key={pagination.state.pageSize}
                     pageIndex={pagination.state.pageIndex}
                     pageCount={pagination.pageCount}
                     pageSize={pagination.state.pageSize}

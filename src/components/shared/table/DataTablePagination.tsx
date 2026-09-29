@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 const PAGE_SIZE_OPTIONS = [1, 10, 20, 50, 100]
 
@@ -44,11 +44,6 @@ const DataTablePagination = ({
 }: DataTablePaginationProps) => {
   const [customLimit, setCustomLimit] = useState(String(pageSize))
   const [showCustomLimit, setShowCustomLimit] = useState(!PAGE_SIZE_OPTIONS.includes(pageSize))
-
-  useEffect(() => {
-    setCustomLimit(String(pageSize))
-    setShowCustomLimit(!PAGE_SIZE_OPTIONS.includes(pageSize))
-  }, [pageSize])
 
   const currentPage = Math.min(Math.max(pageIndex + 1, 1), Math.max(pageCount, 1))
   const pageItems = getPageItems(Math.max(pageCount, 1), currentPage)
