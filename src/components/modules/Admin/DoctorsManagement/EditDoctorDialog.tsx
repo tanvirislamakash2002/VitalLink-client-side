@@ -96,8 +96,8 @@ const EditDoctorDialog = ({ doctor, specialties, onClose }: EditDoctorDialogProp
           return
         }
 
-        await queryClient.invalidateQueries({ queryKey: ["doctors"] })
         onClose()
+        void queryClient.invalidateQueries({ queryKey: ["doctors"] })
       } catch (error) {
         setFormError(error instanceof Error ? error.message : "Could not update the doctor.")
       }

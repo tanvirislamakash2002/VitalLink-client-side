@@ -30,8 +30,8 @@ const DeleteDoctorDialog = ({ doctor, onClose }: DeleteDoctorDialogProps) => {
         return
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["doctors"] })
       onClose()
+      void queryClient.invalidateQueries({ queryKey: ["doctors"] })
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Could not delete the doctor.")
     }

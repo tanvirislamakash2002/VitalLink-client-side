@@ -81,7 +81,7 @@ const CreateDoctorDialog = ({ specialties }: CreateDoctorDialogProps) => {
           return
         }
 
-        await queryClient.invalidateQueries({ queryKey: ["doctors"] })
+        void queryClient.invalidateQueries({ queryKey: ["doctors"] })
         form.reset()
         setSelectedPhoto(null)
         setOpen(false)
