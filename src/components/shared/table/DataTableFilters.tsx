@@ -22,6 +22,7 @@ export interface DataTableFiltersProps {
   filters: DataTableFilterDefinition[]
   values: Record<string, DataTableFilterValue>
   onFilterChange: (param: string, value: DataTableFilterValue) => void
+  onClearAll: () => void
   disabled?: boolean
 }
 
@@ -178,18 +179,35 @@ function FilterControl({ filter, value, onFilterChange, disabled }: FilterContro
   )
 }
 
-const DataTableFilters = ({ filters, values, onFilterChange, disabled = false }: DataTableFiltersProps) => (
-  <div className="flex min-w-[min(100%,32rem)] flex-[2_1_32rem] flex-wrap items-start gap-2">
-    {filters.map((filter) => (
-      <FilterControl
-        key={`${filter.id}-${JSON.stringify(values[filter.param] ?? null)}`}
-        filter={filter}
-        value={values[filter.param]}
-        onFilterChange={onFilterChange}
+const DataTableFilters = ({ filters, values, onFilterChange, onClearAll, disabled = false }: DataTableFiltersProps) => {
+  const [draftRevision, setDraftRevision] = useState(0)
+
+  return (
+    <div className="flex min-w-[min(100%,32rem)] flex-[2_1_32rem] flex-wrap items-start gap-2">
+      {filters.map((filter) => (
+        <FilterControl
+          key={`${draftRevision}-${filter.id}-${JSON.stringify(values[filter.param] ?? null)}`}
+          filter={filter}
+          value={values[filter.param]}
+          onFilterChange={onFilterChange}
+          disabled={disabled}
+        />
+      ))}
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        onClick={() => {
+          setDraftRevision((revision) => revision + 1)
+          onClearAll()
+        }}
         disabled={disabled}
-      />
-    ))}
-  </div>
-)
+        className="h-9"
+      >
+        Clear filters
+      </Button>
+    </div>
+  )
+}
 
 export default DataTableFilters

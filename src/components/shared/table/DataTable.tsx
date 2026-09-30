@@ -30,6 +30,7 @@ interface DataTableProps<TData> {
         definitions: DataTableFilterDefinition[];
         values: Record<string, DataTableFilterValue>;
         onFilterChange: (param: string, value: DataTableFilterValue) => void;
+        onClearAll: () => void;
         disabled?: boolean;
     };
     sorting?: {
@@ -166,6 +167,7 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, se
                     filters={filters.definitions}
                     values={filters.values}
                     onFilterChange={filters.onFilterChange}
+                    onClearAll={filters.onClearAll}
                     disabled={filters.disabled}
                 />
             )}

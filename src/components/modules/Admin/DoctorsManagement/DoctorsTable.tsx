@@ -214,6 +214,31 @@ const DoctorsTable = () => {
         });
     }, [currentLimit, pathname, router, searchParams, setOptimisticPagination, startTransition]);
 
+    const handleClearAllFilters = useCallback(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        const filterParams = [
+            'gender',
+            'specialties.specialtyId',
+            'appointmentFee[gt]',
+            'appointmentFee[gte]',
+            'appointmentFee[lt]',
+            'appointmentFee[lte]',
+        ];
+        const hadAppliedFilters = filterParams.some((param) => params.has(param));
+
+        filterParams.forEach((param) => params.delete(param));
+        if (!hadAppliedFilters) return;
+
+        params.set('page', '1');
+        const query = params.toString();
+        const nextUrl = query ? `${pathname}?${query}` : pathname;
+
+        startTransition(() => {
+            setOptimisticPagination({ pageIndex: 0, pageSize: currentLimit });
+            router.push(nextUrl, { scroll: false });
+        });
+    }, [currentLimit, pathname, router, searchParams, setOptimisticPagination, startTransition]);
+
     const handleView = (doctor: IDoctor) => {
         console.log("View doctor", doctor)
     }
@@ -268,6 +293,7 @@ const DoctorsTable = () => {
                 definitions: doctorFilters,
                 values: filterValues,
                 onFilterChange: handleFilterChange,
+                onClearAll: handleClearAllFilters,
                 disabled: isFetching || isNavigationPending,
             }}
             sorting={{ state: sortingState, onSortingChange: handleSortingChange }}
