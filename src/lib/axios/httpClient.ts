@@ -149,11 +149,26 @@ const httpDelete =  async <TData>(endpoint: string, options?: ApiRequestOptions)
     }
 }
 
+const httpPatchFormData = async <TData>(endpoint: string, data: FormData, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
+    try {
+        const instance = await axiosInstance();
+        const response = await instance.patch<ApiResponse<TData>>(endpoint, data, {
+            params: options?.params,
+            headers: options?.headers,
+        });
+        return response.data;
+    } catch (error) {
+        console.error(`PATCH request to ${endpoint} failed:`, error);
+        throw error;
+    }
+}
+
 export const httpClient = {
     get: httpGet,
     post: httpPost,
     postFormData: httpPostFormData,
     put: httpPut,
     patch: httpPatch,
+    patchFormData: httpPatchFormData,
     delete: httpDelete,
 }

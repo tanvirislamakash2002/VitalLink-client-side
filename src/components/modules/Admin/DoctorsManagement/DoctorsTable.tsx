@@ -2,17 +2,19 @@
 
 import DataTable from '@/components/shared/table/DataTable';
 import CreateDoctorDialog from './CreateDoctorDialog';
+import EditDoctorDialog from './EditDoctorDialog';
 import { getDoctors } from '@/services/doctor.services';
 import { getSpecialties } from '@/services/specialty.services';
 import { IDoctor } from '@/types/doctor.types';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useOptimistic, useTransition } from 'react';
+import { useCallback, useOptimistic, useState, useTransition } from 'react';
 import { doctorColumns } from './doctorsColumns';
 import { DataTableFilterDefinition, DataTableFilterValue, RangeOperator } from '@/components/shared/table/DataTableFilters';
 
 const DoctorsTable = () => {
+    const [doctorToEdit, setDoctorToEdit] = useState<IDoctor | null>(null);
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -244,7 +246,7 @@ const DoctorsTable = () => {
         console.log("View doctor", doctor)
     }
     const handleEdit = (doctor: IDoctor) => {
-        console.log("Edit doctor", doctor)
+        setDoctorToEdit(doctor)
     }
     const handleDelete = (doctor: IDoctor) => {
         console.log("Delete doctor", doctor)
@@ -286,6 +288,7 @@ const DoctorsTable = () => {
     // );
 
     return (
+        <>
         <DataTable
             data={doctors}
             columns={doctorColumns}
@@ -315,6 +318,15 @@ const DoctorsTable = () => {
                 }
             }
         />
+        {doctorToEdit && (
+            <EditDoctorDialog
+                key={String(doctorToEdit.id)}
+                doctor={doctorToEdit}
+                specialties={specialtiesResponse?.data ?? []}
+                onClose={() => setDoctorToEdit(null)}
+            />
+        )}
+        </>
     )
 };
 

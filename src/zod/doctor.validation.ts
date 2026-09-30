@@ -34,5 +34,34 @@ export const createDoctorFormSchema = z.object({
   specialties: createDoctorPayloadSchema.shape.specialties,
 })
 
+export const editDoctorFormSchema = createDoctorFormSchema
+  .omit({ email: true, password: true, contactNumber: true, address: true })
+  .extend({
+    contactNumber: z.string().refine((value) => value === "" || (value.length >= 11 && value.length <= 14), "Enter a valid contact number"),
+    address: z.string().refine((value) => value === "" || (value.length >= 10 && value.length <= 100), "Address must be 10 to 100 characters"),
+    gender: z.enum(["MALE", "FEMALE", "OTHER"]),
+  })
+
+export const updateDoctorPayloadSchema = z.object({
+  doctor: z.object({
+    name: createDoctorPayloadSchema.shape.doctor.shape.name,
+    registrationNumber: createDoctorPayloadSchema.shape.doctor.shape.registrationNumber,
+    contactNumber: createDoctorPayloadSchema.shape.doctor.shape.contactNumber.optional(),
+    address: createDoctorPayloadSchema.shape.doctor.shape.address,
+    experience: createDoctorPayloadSchema.shape.doctor.shape.experience,
+    gender: z.enum(["MALE", "FEMALE", "OTHER"]),
+    appointmentFee: createDoctorPayloadSchema.shape.doctor.shape.appointmentFee,
+    qualification: createDoctorPayloadSchema.shape.doctor.shape.qualification,
+    currentWorkingPlace: createDoctorPayloadSchema.shape.doctor.shape.currentWorkingPlace,
+    designation: createDoctorPayloadSchema.shape.doctor.shape.designation,
+  }).optional(),
+  specialties: z.array(z.object({
+    specialtyId: z.uuid(),
+    shouldDelete: z.boolean().optional(),
+  })).optional(),
+})
+
 export type CreateDoctorFormValues = z.infer<typeof createDoctorFormSchema>
 export type CreateDoctorPayload = z.infer<typeof createDoctorPayloadSchema>
+export type EditDoctorFormValues = z.infer<typeof editDoctorFormSchema>
+export type UpdateDoctorPayload = z.infer<typeof updateDoctorPayloadSchema>
