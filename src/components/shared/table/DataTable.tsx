@@ -151,6 +151,8 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, se
             const { getHeaderGroups, getRowModel } = table
     return (
         <div>
+            {(search || filters) && (
+                <div className="mb-4 flex flex-wrap items-start gap-3">
             {search && (
                 <DataTableSearch
                     key={search.value}
@@ -167,6 +169,8 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, se
                     disabled={filters.disabled}
                     debounceMs={700}
                 />
+            )}
+                </div>
             )}
             <div className="relative">
                 {

@@ -203,7 +203,7 @@ function FilterControl({ filter, value, onFilterChange, disabled, debounceMs }: 
 }
 
 const DataTableFilters = ({ filters, values, onFilterChange, disabled = false, debounceMs = 700 }: DataTableFiltersProps) => (
-  <div className="mb-4 flex flex-wrap items-start gap-2">
+  <div className="flex min-w-[min(100%,32rem)] flex-[2_1_32rem] flex-wrap items-start gap-2">
     {filters.map((filter) => (
       <FilterControl
         key={`${filter.id}-${JSON.stringify(values[filter.param] ?? null)}`}
