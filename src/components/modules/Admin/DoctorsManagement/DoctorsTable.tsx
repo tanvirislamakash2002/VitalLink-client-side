@@ -2,12 +2,14 @@
 
 import DataTable from '@/components/shared/table/DataTable';
 import { getDoctors } from '@/services/doctor.services';
+import { getSpecialties } from '@/services/specialty.services';
 import { IDoctor } from '@/types/doctor.types';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useOptimistic, useTransition } from 'react';
+import { useCallback, useOptimistic, useTransition } from 'react';
 import { doctorColumns } from './doctorsColumns';
+import { DataTableFilterDefinition, DataTableFilterValue, RangeOperator } from '@/components/shared/table/DataTableFilters';
 
 const DoctorsTable = () => {
     const router = useRouter();
@@ -56,12 +58,62 @@ const DoctorsTable = () => {
         queryFn: () => getDoctors(queryString),
         staleTime: 1000 * 60 * 60,
     })
+    const { data: specialtiesResponse } = useQuery({
+        queryKey: ["specialties"],
+        queryFn: getSpecialties,
+        staleTime: 1000 * 60 * 60,
+    })
 
     const doctors = doctorDataResponse?.data ?? [];
     const paginationState = optimisticPagination ?? {
         pageIndex: (doctorDataResponse?.meta?.page ?? currentPage) - 1,
         pageSize: doctorDataResponse?.meta?.limit ?? currentLimit,
     };
+    const specialtyIds = searchParams.getAll('specialties.specialtyId');
+    const filterValues: Record<string, DataTableFilterValue> = {
+        gender: searchParams.get('gender') ?? undefined,
+        'specialties.specialtyId': specialtyIds.length ? specialtyIds : undefined,
+        appointmentFee: {
+            ...(searchParams.get('appointmentFee[gt]') ? { gt: searchParams.get('appointmentFee[gt]')! } : {}),
+            ...(searchParams.get('appointmentFee[gte]') ? { gte: searchParams.get('appointmentFee[gte]')! } : {}),
+            ...(searchParams.get('appointmentFee[lt]') ? { lt: searchParams.get('appointmentFee[lt]')! } : {}),
+            ...(searchParams.get('appointmentFee[lte]') ? { lte: searchParams.get('appointmentFee[lte]')! } : {}),
+        },
+    };
+    const activeFeeFilters = filterValues.appointmentFee as Partial<Record<RangeOperator, string>>;
+    if (Object.keys(activeFeeFilters).length === 0) delete filterValues.appointmentFee;
+
+    const doctorFilters: DataTableFilterDefinition[] = [
+        {
+            id: 'specialties',
+            param: 'specialties.specialtyId',
+            label: 'Specialties',
+            type: 'multiple',
+            options: (specialtiesResponse?.data ?? []).map((specialty) => ({
+                label: specialty.title,
+                value: specialty.id,
+            })),
+        },
+        {
+            id: 'gender',
+            param: 'gender',
+            label: 'Gender',
+            type: 'single',
+            options: [
+                { label: 'Male', value: 'MALE' },
+                { label: 'Female', value: 'FEMALE' },
+                { label: 'Other', value: 'OTHER' },
+            ],
+        },
+        {
+            id: 'appointmentFee',
+            param: 'appointmentFee',
+            label: 'Appointment fee',
+            type: 'range',
+            lowerLabel: 'Minimum fee',
+            upperLabel: 'Maximum fee',
+        },
+    ];
 
     const handleSortingChange = (sorting: SortingState) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -130,6 +182,38 @@ const DoctorsTable = () => {
         });
     };
 
+    const handleFilterChange = useCallback((param: string, value: DataTableFilterValue) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (param === 'appointmentFee') {
+            (['gt', 'gte', 'lt', 'lte'] as const).forEach((operator) => params.delete(`appointmentFee[${operator}]`));
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+                Object.entries(value).forEach(([operator, amount]) => {
+                    if (amount !== undefined && amount !== '') {
+                        params.set(`appointmentFee[${operator}]`, amount);
+                    }
+                });
+            }
+        } else {
+            params.delete(param);
+            if (Array.isArray(value)) {
+                value.forEach((item) => params.append(param, item));
+            } else if (typeof value === 'string' && value) {
+                params.set(param, value);
+            }
+        }
+
+        if (params.toString() === searchParams.toString()) return;
+        params.set('page', '1');
+        const query = params.toString();
+        const nextUrl = query ? `${pathname}?${query}` : pathname;
+
+        startTransition(() => {
+            setOptimisticPagination({ pageIndex: 0, pageSize: currentLimit });
+            router.push(nextUrl, { scroll: false });
+        });
+    }, [currentLimit, pathname, router, searchParams, setOptimisticPagination, startTransition]);
+
     const handleView = (doctor: IDoctor) => {
         console.log("View doctor", doctor)
     }
@@ -180,6 +264,12 @@ const DoctorsTable = () => {
             data={doctors}
             columns={doctorColumns}
             search={{ value: searchTerm, onSearchChange: handleSearchChange }}
+            filters={{
+                definitions: doctorFilters,
+                values: filterValues,
+                onFilterChange: handleFilterChange,
+                disabled: isFetching || isNavigationPending,
+            }}
             sorting={{ state: sortingState, onSortingChange: handleSortingChange }}
             pagination={{
                 state: paginationState,

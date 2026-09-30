@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, PaginationState, SortingState, useReactTable } from '@tanstack/react-table';
+import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, PaginationState, SortingState, useReactTable } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from 'lucide-react';
 import React from 'react';
 import DataTablePagination from './DataTablePagination';
 import DataTableSearch from './DataTableSearch';
+import DataTableFilters, { DataTableFilterDefinition, DataTableFilterValue } from './DataTableFilters';
 
 
 interface DataTableActions<TData> {
@@ -25,6 +26,12 @@ interface DataTableProps<TData> {
         onSearchChange: (value: string) => void;
         debounceMs?: number;
     };
+    filters?: {
+        definitions: DataTableFilterDefinition[];
+        values: Record<string, DataTableFilterValue>;
+        onFilterChange: (param: string, value: DataTableFilterValue) => void;
+        disabled?: boolean;
+    };
     sorting?: {
         state: SortingState;
         onSortingChange: (state: SortingState) => void
@@ -37,7 +44,7 @@ interface DataTableProps<TData> {
     }
 }
 
-const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, search, sorting, pagination }: DataTableProps<TData>) => {
+const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, search, filters, sorting, pagination }: DataTableProps<TData>) => {
 
     const tableColumns: ColumnDef<TData>[] = actions ? [...columns,
     {
@@ -92,10 +99,16 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, se
         getSortedRowModel: getSortedRowModel(),
         manualSorting: !!sorting,
         manualPagination: !!pagination,
-        manualFiltering: !!search,
+        manualFiltering: !!search || !!filters,
         pageCount: pagination?.pageCount,
         state: {
             ...(search ? { globalFilter: search.value } : {}),
+            ...(filters ? {
+                columnFilters: filters.definitions.flatMap((filter) => {
+                    const value = filters.values[filter.param];
+                    return value === undefined ? [] : [{ id: filter.id, value }];
+                }),
+            } : {}),
             ...(sorting ? { sorting: sorting.state } : {}),
             ...(pagination ? { pagination: pagination.state } : {}),
         },
@@ -103,6 +116,21 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, se
             (updater) => {
                 const nextFilter = typeof updater === "function" ? updater(search.value) : updater;
                 search.onSearchChange(String(nextFilter ?? ""));
+            }
+            : undefined,
+        onColumnFiltersChange: filters ?
+            (updater) => {
+                const currentState: ColumnFiltersState = filters.definitions.flatMap((filter) => {
+                    const value = filters.values[filter.param];
+                    return value === undefined ? [] : [{ id: filter.id, value }];
+                });
+                const nextState = typeof updater === "function" ? updater(currentState) : updater;
+                filters.definitions.forEach((filter) => {
+                    const nextValue = nextState.find((item) => item.id === filter.id)?.value as DataTableFilterValue;
+                    if (JSON.stringify(nextValue) !== JSON.stringify(filters.values[filter.param])) {
+                        filters.onFilterChange(filter.param, nextValue);
+                    }
+                });
             }
             : undefined,
         onSortingChange: sorting ?
@@ -129,6 +157,15 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, se
                     value={search.value}
                     onSearchChange={search.onSearchChange}
                     debounceMs={search.debounceMs}
+                />
+            )}
+            {filters && (
+                <DataTableFilters
+                    filters={filters.definitions}
+                    values={filters.values}
+                    onFilterChange={filters.onFilterChange}
+                    disabled={filters.disabled}
+                    debounceMs={700}
                 />
             )}
             <div className="relative">

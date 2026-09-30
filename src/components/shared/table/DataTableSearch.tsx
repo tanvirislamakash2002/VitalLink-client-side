@@ -15,7 +15,7 @@ interface DataTableSearchProps {
 const DataTableSearch = ({
   value,
   onSearchChange,
-  debounceMs = 350,
+  debounceMs = 650,
   placeholder = "Search...",
 }: DataTableSearchProps) => {
   const [inputValue, setInputValue] = useState(value)
