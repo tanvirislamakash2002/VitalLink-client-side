@@ -1,8 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 
 export type RangeOperator = "gt" | "gte" | "lt" | "lte"
 export type DataTableFilterValue = string | string[] | Partial<Record<RangeOperator, string>> | undefined
@@ -22,7 +23,6 @@ export interface DataTableFiltersProps {
   values: Record<string, DataTableFilterValue>
   onFilterChange: (param: string, value: DataTableFilterValue) => void
   disabled?: boolean
-  debounceMs?: number
 }
 
 interface FilterControlProps {
@@ -30,10 +30,9 @@ interface FilterControlProps {
   value: DataTableFilterValue
   onFilterChange: DataTableFiltersProps["onFilterChange"]
   disabled: boolean
-  debounceMs: number
 }
 
-function FilterControl({ filter, value, onFilterChange, disabled, debounceMs }: FilterControlProps) {
+function FilterControl({ filter, value, onFilterChange, disabled }: FilterControlProps) {
   const selectedValues = Array.isArray(value) ? value : value ? [value as string] : []
   const rangeValue = filter.type === "range" && value && !Array.isArray(value) && typeof value !== "string" ? value : {}
   const [draftValues, setDraftValues] = useState<string[]>(selectedValues)
@@ -41,70 +40,50 @@ function FilterControl({ filter, value, onFilterChange, disabled, debounceMs }: 
   const [upperOperator, setUpperOperator] = useState<"lt" | "lte">(rangeValue.lt !== undefined ? "lt" : "lte")
   const [lowerValue, setLowerValue] = useState(rangeValue.gt ?? rangeValue.gte ?? "")
   const [upperValue, setUpperValue] = useState(rangeValue.lt ?? rangeValue.lte ?? "")
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const filterParam = filter.param
   const filterType = filter.type
 
-  useEffect(() => () => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-  }, [])
-
-  const scheduleRangeChange = (
-    nextLowerValue = lowerValue,
-    nextUpperValue = upperValue,
-    nextLowerOperator = lowerOperator,
-    nextUpperOperator = upperOperator,
-  ) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      const nextRange: Partial<Record<RangeOperator, string>> = {}
-      if (nextLowerValue !== "") nextRange[nextLowerOperator] = nextLowerValue
-      if (nextUpperValue !== "") nextRange[nextUpperOperator] = nextUpperValue
-      onFilterChange(filterParam, Object.keys(nextRange).length ? nextRange : undefined)
-      debounceRef.current = null
-    }, debounceMs)
-  }
-
   const applyMultiple = () => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      onFilterChange(filterParam, draftValues.length ? draftValues : undefined)
-      debounceRef.current = null
-    }, debounceMs)
+    onFilterChange(filterParam, draftValues.length ? draftValues : undefined)
   }
 
   const clearFilter = () => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
     if (filterType === "multiple") {
       setDraftValues([])
-      debounceRef.current = setTimeout(() => {
-        onFilterChange(filterParam, undefined)
-        debounceRef.current = null
-      }, debounceMs)
-      return
     }
     if (filterType === "range") {
       setLowerValue("")
       setUpperValue("")
-      scheduleRangeChange("", "")
-      return
     }
     onFilterChange(filterParam, undefined)
+  }
+
+  const applyRange = () => {
+    const nextRange: Partial<Record<RangeOperator, string>> = {}
+    if (lowerValue !== "") nextRange[lowerOperator] = lowerValue
+    if (upperValue !== "") nextRange[upperOperator] = upperValue
+    onFilterChange(filterParam, Object.keys(nextRange).length ? nextRange : undefined)
   }
 
   const hasValue = filterType === "range"
     ? Boolean(rangeValue.gt || rangeValue.gte || rangeValue.lt || rangeValue.lte)
     : selectedValues.length > 0
+  const selectedLabels = filterType === "range"
+    ? Object.entries(rangeValue).map(([operator, amount]) => `${operator} ${amount}`)
+    : filterType === "single"
+      ? selectedValues.map((selected) => filter.options.find((option) => option.value === selected)?.label ?? selected)
+      : selectedValues.map((selected) => filter.options.find((option) => option.value === selected)?.label ?? selected)
 
   return (
-    <details className="group relative">
-      <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-md border border-input bg-background px-3 text-sm hover:bg-accent [&::-webkit-details-marker]:hidden">
-        <span>{filter.label}</span>
-        {hasValue && <span className="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">{filterType === "multiple" ? selectedValues.length : "On"}</span>}
-        <span aria-hidden="true" className="text-muted-foreground">⌄</span>
-      </summary>
+    <div className="flex min-w-0 max-w-full flex-col items-start gap-1.5">
+      <details className="group relative">
+        <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-md border border-input bg-background px-3 text-sm hover:bg-accent [&::-webkit-details-marker]:hidden">
+          <span>{filter.label}</span>
+          {hasValue && <span className="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">{filterType === "multiple" ? selectedValues.length : "On"}</span>}
+          <span aria-hidden="true" className="text-muted-foreground">⌄</span>
+        </summary>
 
-      <div className="absolute top-full left-0 z-30 mt-2 min-w-56 rounded-md border bg-popover p-3 text-popover-foreground shadow-md">
+        <div className="absolute top-full left-0 z-30 mt-2 min-w-56 rounded-md border bg-popover p-3 text-popover-foreground shadow-md">
         {filterType === "single" && (
           <select
             aria-label={filter.label}
@@ -152,21 +131,14 @@ function FilterControl({ filter, value, onFilterChange, disabled, debounceMs }: 
                 <select
                   aria-label="Minimum comparison"
                   value={lowerOperator}
-                  onChange={(event) => {
-                    const nextOperator = event.target.value as "gt" | "gte"
-                    setLowerOperator(nextOperator)
-                    scheduleRangeChange(lowerValue, upperValue, nextOperator, upperOperator)
-                  }}
+                  onChange={(event) => setLowerOperator(event.target.value as "gt" | "gte")}
                   disabled={disabled}
                   className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
                 >
                   <option value="gte">At least</option>
                   <option value="gt">Greater than</option>
                 </select>
-                <Input type="number" min="0" step="any" value={lowerValue} onChange={(event) => {
-                  setLowerValue(event.target.value)
-                  scheduleRangeChange(event.target.value)
-                }} disabled={disabled} aria-label={filter.lowerLabel ?? "Minimum value"} />
+                <Input type="number" min="0" step="any" value={lowerValue} onChange={(event) => setLowerValue(event.target.value)} disabled={disabled} aria-label={filter.lowerLabel ?? "Minimum value"} />
               </div>
             </label>
             <label className="block space-y-1.5 text-xs text-muted-foreground">
@@ -175,34 +147,38 @@ function FilterControl({ filter, value, onFilterChange, disabled, debounceMs }: 
                 <select
                   aria-label="Maximum comparison"
                   value={upperOperator}
-                  onChange={(event) => {
-                    const nextOperator = event.target.value as "lt" | "lte"
-                    setUpperOperator(nextOperator)
-                    scheduleRangeChange(lowerValue, upperValue, lowerOperator, nextOperator)
-                  }}
+                  onChange={(event) => setUpperOperator(event.target.value as "lt" | "lte")}
                   disabled={disabled}
                   className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
                 >
                   <option value="lte">At most</option>
                   <option value="lt">Less than</option>
                 </select>
-                <Input type="number" min="0" step="any" value={upperValue} onChange={(event) => {
-                  setUpperValue(event.target.value)
-                  scheduleRangeChange(lowerValue, event.target.value)
-                }} disabled={disabled} aria-label={filter.upperLabel ?? "Maximum value"} />
+                <Input type="number" min="0" step="any" value={upperValue} onChange={(event) => setUpperValue(event.target.value)} disabled={disabled} aria-label={filter.upperLabel ?? "Maximum value"} />
               </div>
             </label>
-            <div className="flex justify-end border-t pt-3">
-              <Button type="button" size="sm" variant="ghost" onClick={clearFilter} disabled={disabled}>Clear range</Button>
+            <div className="flex justify-between gap-2 border-t pt-3">
+              <Button type="button" size="sm" variant="ghost" onClick={clearFilter} disabled={disabled}>Clear</Button>
+              <Button type="button" size="sm" onClick={applyRange} disabled={disabled}>Apply</Button>
             </div>
           </div>
         )}
       </div>
-    </details>
+      </details>
+      {selectedLabels.length > 0 && (
+        <div className="flex max-w-full flex-wrap gap-1.5">
+          {selectedLabels.map((label, index) => (
+            <Badge key={`${filter.id}-${index}-${label}`} variant="secondary" className="max-w-full truncate">
+              {label}
+            </Badge>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
-const DataTableFilters = ({ filters, values, onFilterChange, disabled = false, debounceMs = 700 }: DataTableFiltersProps) => (
+const DataTableFilters = ({ filters, values, onFilterChange, disabled = false }: DataTableFiltersProps) => (
   <div className="flex min-w-[min(100%,32rem)] flex-[2_1_32rem] flex-wrap items-start gap-2">
     {filters.map((filter) => (
       <FilterControl
@@ -211,7 +187,6 @@ const DataTableFilters = ({ filters, values, onFilterChange, disabled = false, d
         value={values[filter.param]}
         onFilterChange={onFilterChange}
         disabled={disabled}
-        debounceMs={debounceMs}
       />
     ))}
   </div>

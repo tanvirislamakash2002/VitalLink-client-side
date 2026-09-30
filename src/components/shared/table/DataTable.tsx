@@ -167,7 +167,6 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, se
                     values={filters.values}
                     onFilterChange={filters.onFilterChange}
                     disabled={filters.disabled}
-                    debounceMs={700}
                 />
             )}
                 </div>
