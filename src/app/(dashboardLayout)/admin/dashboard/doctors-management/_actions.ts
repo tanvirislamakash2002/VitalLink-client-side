@@ -88,3 +88,22 @@ export async function updateDoctorAction(doctorId: string, formData: FormData): 
     }
   }
 }
+
+export type DeleteDoctorResult = { success: true; message: string } | { success: false; message: string }
+
+export async function deleteDoctorAction(doctorId: string): Promise<DeleteDoctorResult> {
+  if (!doctorId.trim()) {
+    return { success: false, message: "Doctor ID is missing." }
+  }
+
+  try {
+    const response = await httpClient.delete<{ message: string }>(`/doctors/${encodeURIComponent(doctorId)}`)
+    return { success: true, message: response.message }
+  } catch (error) {
+    const responseError = error as { response?: { data?: { message?: string } }; message?: string }
+    return {
+      success: false,
+      message: responseError.response?.data?.message ?? responseError.message ?? "Could not delete the doctor.",
+    }
+  }
+}

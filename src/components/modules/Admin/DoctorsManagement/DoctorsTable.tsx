@@ -2,6 +2,7 @@
 
 import DataTable from '@/components/shared/table/DataTable';
 import CreateDoctorDialog from './CreateDoctorDialog';
+import DeleteDoctorDialog from './DeleteDoctorDialog';
 import EditDoctorDialog from './EditDoctorDialog';
 import { getDoctors } from '@/services/doctor.services';
 import { getSpecialties } from '@/services/specialty.services';
@@ -15,6 +16,7 @@ import { DataTableFilterDefinition, DataTableFilterValue, RangeOperator } from '
 
 const DoctorsTable = () => {
     const [doctorToEdit, setDoctorToEdit] = useState<IDoctor | null>(null);
+    const [doctorToDelete, setDoctorToDelete] = useState<IDoctor | null>(null);
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -249,7 +251,7 @@ const DoctorsTable = () => {
         setDoctorToEdit(doctor)
     }
     const handleDelete = (doctor: IDoctor) => {
-        console.log("Delete doctor", doctor)
+        setDoctorToDelete(doctor)
     }
     // const { getHeaderGroups, getRowModel } = useReactTable({
     //     data: doctors,
@@ -324,6 +326,13 @@ const DoctorsTable = () => {
                 doctor={doctorToEdit}
                 specialties={specialtiesResponse?.data ?? []}
                 onClose={() => setDoctorToEdit(null)}
+            />
+        )}
+        {doctorToDelete && (
+            <DeleteDoctorDialog
+                key={String(doctorToDelete.id)}
+                doctor={doctorToDelete}
+                onClose={() => setDoctorToDelete(null)}
             />
         )}
         </>
