@@ -3,6 +3,7 @@
 import { updateDoctorAction } from "@/app/(dashboardLayout)/admin/dashboard/doctors-management/_actions"
 import AppField from "@/components/shared/form/AppField"
 import AppSubmitButton from "@/components/shared/form/AppSubmitButton"
+import SpecialtyMultiSelect from "@/components/shared/form/SpecialtyMultiSelect"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -204,27 +205,18 @@ const EditDoctorDialog = ({ doctor, specialties, onClose }: EditDoctorDialogProp
 
             <form.Field name="specialties" validators={{ onChange: editDoctorFormSchema.shape.specialties }}>
               {(field) => (
-                <fieldset className="space-y-2" disabled={isPending}>
-                  <legend className="text-sm font-medium">Specialties</legend>
-                  <div className="grid max-h-36 gap-2 overflow-y-auto rounded-md border p-3 sm:grid-cols-2">
-                    {specialties.map((specialty) => (
-                      <label key={specialty.id} className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={field.state.value.includes(specialty.id)}
-                          onChange={(event) => field.handleChange(event.target.checked
-                            ? [...field.state.value, specialty.id]
-                            : field.state.value.filter((id) => id !== specialty.id))}
-                          className="size-4 accent-primary"
-                        />
-                        <span>{specialty.title}</span>
-                      </label>
-                    ))}
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Specialties</label>
+                  <SpecialtyMultiSelect
+                    specialties={specialties}
+                    value={field.state.value}
+                    onChange={field.handleChange}
+                    disabled={isPending}
+                  />
                   {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
                     <p className="text-sm text-destructive">{String(field.state.meta.errors[0])}</p>
                   )}
-                </fieldset>
+                </div>
               )}
             </form.Field>
 
