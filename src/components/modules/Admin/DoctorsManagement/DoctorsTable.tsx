@@ -1,6 +1,7 @@
 "use client"
 
 import DataTable from '@/components/shared/table/DataTable';
+import CreateDoctorDialog from './CreateDoctorDialog';
 import { getDoctors } from '@/services/doctor.services';
 import { getSpecialties } from '@/services/specialty.services';
 import { IDoctor } from '@/types/doctor.types';
@@ -288,6 +289,7 @@ const DoctorsTable = () => {
         <DataTable
             data={doctors}
             columns={doctorColumns}
+            toolbarActions={<CreateDoctorDialog specialties={specialtiesResponse?.data ?? []} />}
             search={{ value: searchTerm, onSearchChange: handleSearchChange }}
             filters={{
                 definitions: doctorFilters,

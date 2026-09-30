@@ -19,6 +19,7 @@ interface DataTableProps<TData> {
     data: TData[];
     columns: ColumnDef<TData>[];
     actions?: DataTableActions<TData>;
+    toolbarActions?: React.ReactNode;
     emptyMessage?: string;
     isLoading?: boolean;
     search?: {
@@ -45,7 +46,7 @@ interface DataTableProps<TData> {
     }
 }
 
-const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, search, filters, sorting, pagination }: DataTableProps<TData>) => {
+const DataTable = <TData,>({ data, columns, actions, toolbarActions, emptyMessage, isLoading, search, filters, sorting, pagination }: DataTableProps<TData>) => {
 
     const tableColumns: ColumnDef<TData>[] = actions ? [...columns,
     {
@@ -152,7 +153,7 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, se
             const { getHeaderGroups, getRowModel } = table
     return (
         <div>
-            {(search || filters) && (
+            {(search || filters || toolbarActions) && (
                 <div className="mb-4 flex flex-wrap items-start gap-3">
             {search && (
                 <DataTableSearch
@@ -171,6 +172,7 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, se
                     disabled={filters.disabled}
                 />
             )}
+            {toolbarActions && <div className="ml-auto shrink-0">{toolbarActions}</div>}
                 </div>
             )}
             <div className="relative">

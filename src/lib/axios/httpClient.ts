@@ -52,7 +52,6 @@ const axiosInstance = async () => {
         baseURL : API_BASE_URL,
         timeout : 30000,
         headers:{
-            'Content-Type' : 'application/json',
             Cookie : cookieHeader
         }
     })
@@ -80,6 +79,20 @@ const httpGet = async <TData>(endpoint: string, options?: ApiRequestOptions) : P
 }
 
 const httpPost = async <TData>(endpoint: string, data: unknown, options?: ApiRequestOptions) : Promise<ApiResponse<TData>> => {
+    try {
+        const instance = await axiosInstance();
+        const response = await instance.post<ApiResponse<TData>>(endpoint, data, {
+            params: options?.params,
+            headers: options?.headers,
+        });
+        return response.data;
+    } catch (error) {
+        console.error(`POST request to ${endpoint} failed:`, error);
+        throw error;
+    }
+}
+
+const httpPostFormData = async <TData>(endpoint: string, data: FormData, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
     try {
         const instance = await axiosInstance();
         const response = await instance.post<ApiResponse<TData>>(endpoint, data, {
@@ -139,6 +152,7 @@ const httpDelete =  async <TData>(endpoint: string, options?: ApiRequestOptions)
 export const httpClient = {
     get: httpGet,
     post: httpPost,
+    postFormData: httpPostFormData,
     put: httpPut,
     patch: httpPatch,
     delete: httpDelete,
