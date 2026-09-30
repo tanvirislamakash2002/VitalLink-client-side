@@ -16,6 +16,7 @@ const DoctorsTable = () => {
     const queryString = searchParams.toString();
     const pageParam = searchParams.get('page');
     const limitParam = searchParams.get('limit');
+    const searchTerm = searchParams.get('searchTerm') ?? '';
     const currentPage = Math.max(Number(pageParam) || 1, 1);
     const currentLimit = Math.max(Number(limitParam) || 10, 1);
     const [optimisticPagination, setOptimisticPagination] = useOptimistic<PaginationState | null, PaginationState>(
@@ -103,6 +104,32 @@ const DoctorsTable = () => {
         });
     };
 
+    const handleSearchChange = (nextSearchTerm: string) => {
+        const normalizedSearchTerm = nextSearchTerm.trim();
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (normalizedSearchTerm) {
+            params.set('searchTerm', normalizedSearchTerm);
+        } else {
+            params.delete('searchTerm');
+        }
+        params.set('page', '1');
+
+        if (
+            params.get('searchTerm') === searchParams.get('searchTerm') &&
+            searchParams.get('page') === '1'
+        ) {
+            return;
+        }
+
+        const query = params.toString();
+        const nextUrl = query ? `${pathname}?${query}` : pathname;
+        startTransition(() => {
+            setOptimisticPagination({ ...paginationState, pageIndex: 0 });
+            router.push(nextUrl, { scroll: false });
+        });
+    };
+
     const handleView = (doctor: IDoctor) => {
         console.log("View doctor", doctor)
     }
@@ -152,6 +179,7 @@ const DoctorsTable = () => {
         <DataTable
             data={doctors}
             columns={doctorColumns}
+            search={{ value: searchTerm, onSearchChange: handleSearchChange }}
             sorting={{ state: sortingState, onSortingChange: handleSortingChange }}
             pagination={{
                 state: paginationState,

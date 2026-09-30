@@ -5,6 +5,7 @@ import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSorte
 import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from 'lucide-react';
 import React from 'react';
 import DataTablePagination from './DataTablePagination';
+import DataTableSearch from './DataTableSearch';
 
 
 interface DataTableActions<TData> {
@@ -19,6 +20,11 @@ interface DataTableProps<TData> {
     actions?: DataTableActions<TData>;
     emptyMessage?: string;
     isLoading?: boolean;
+    search?: {
+        value: string;
+        onSearchChange: (value: string) => void;
+        debounceMs?: number;
+    };
     sorting?: {
         state: SortingState;
         onSortingChange: (state: SortingState) => void
@@ -31,7 +37,7 @@ interface DataTableProps<TData> {
     }
 }
 
-const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, sorting, pagination }: DataTableProps<TData>) => {
+const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, search, sorting, pagination }: DataTableProps<TData>) => {
 
     const tableColumns: ColumnDef<TData>[] = actions ? [...columns,
     {
@@ -86,11 +92,19 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, so
         getSortedRowModel: getSortedRowModel(),
         manualSorting: !!sorting,
         manualPagination: !!pagination,
+        manualFiltering: !!search,
         pageCount: pagination?.pageCount,
         state: {
+            ...(search ? { globalFilter: search.value } : {}),
             ...(sorting ? { sorting: sorting.state } : {}),
             ...(pagination ? { pagination: pagination.state } : {}),
         },
+        onGlobalFilterChange: search ?
+            (updater) => {
+                const nextFilter = typeof updater === "function" ? updater(search.value) : updater;
+                search.onSearchChange(String(nextFilter ?? ""));
+            }
+            : undefined,
         onSortingChange: sorting ?
             (updater) => {
                 const currentSortingState = sorting.state;
@@ -108,17 +122,26 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, so
     })
             const { getHeaderGroups, getRowModel } = table
     return (
-        <div className="relative">
-            {
-                isLoading && (
-                    <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center">
-                        <div role="status" aria-live="polite" className="flex items-center gap-2 rounded-md bg-background px-3 py-2 shadow-sm">
-                            <div aria-hidden="true" className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                            <span className="text-sm text-muted-foreground">Loading...</span>
+        <div>
+            {search && (
+                <DataTableSearch
+                    key={search.value}
+                    value={search.value}
+                    onSearchChange={search.onSearchChange}
+                    debounceMs={search.debounceMs}
+                />
+            )}
+            <div className="relative">
+                {
+                    isLoading && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                            <div role="status" aria-live="polite" className="flex items-center gap-2 rounded-md bg-background px-3 py-2 shadow-sm">
+                                <div aria-hidden="true" className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                <span className="text-sm text-muted-foreground">Loading...</span>
+                            </div>
                         </div>
-                    </div>
-                )
-            }
+                    )
+                }
             <div className=" rounded-lg border">
                 <Table>
                     <TableHeader>
@@ -180,6 +203,7 @@ const DataTable = <TData,>({ data, columns, actions, emptyMessage, isLoading, so
                         }
                     </TableBody>
                 </Table>
+            </div>
             </div>
             {pagination && (
                 <DataTablePagination
