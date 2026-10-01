@@ -4,6 +4,7 @@ import { DataTableFilterValue, RangeOperator } from "@/components/shared/table/D
 import { PaginationState, SortingState } from "@tanstack/react-table"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useOptimistic, useTransition } from "react"
+import { useSearchTermUrlSync } from "@/hooks/useSearchTermUrlSync"
 
 interface UseDataTableUrlStateOptions {
   sortFields: Record<string, string>
@@ -89,6 +90,16 @@ export function useDataTableUrlState({
     })
   }, [pathname, queryString, router, setOptimisticPagination, startTransition])
 
+  const navigateToFirstPage = useCallback((params: URLSearchParams) => {
+    navigateWithParams(params, { pageIndex: 0, pageSize: pagination.pageSize })
+  }, [navigateWithParams, pagination.pageSize])
+  const { searchTerm, handleSearchTermChange } = useSearchTermUrlSync({
+    searchParams,
+    navigate: navigateToFirstPage,
+    searchParam,
+    pageParam,
+  })
+
   const handleSortingChange = useCallback((nextSorting: SortingState) => {
     const params = new URLSearchParams(queryString)
     const sort = nextSorting[0]
@@ -114,17 +125,6 @@ export function useDataTableUrlState({
     params.set(pageSizeParam, String(nextState.pageSize))
     navigateWithParams(params, nextState)
   }, [navigateWithParams, pageParam, pageSizeParam, pagination, queryString])
-
-  const handleSearchChange = useCallback((value: string) => {
-    const params = new URLSearchParams(queryString)
-    const normalizedValue = value.trim()
-    if (normalizedValue) params.set(searchParam, normalizedValue)
-    else params.delete(searchParam)
-
-    if (params.get(searchParam) === searchParams.get(searchParam) && pageNumber === 1) return
-    params.set(pageParam, "1")
-    navigateWithParams(params, { pageIndex: 0, pageSize: pagination.pageSize })
-  }, [navigateWithParams, pageNumber, pageParam, pagination.pageSize, queryString, searchParam, searchParams])
 
   const handleFilterChange = useCallback((param: string, value: DataTableFilterValue) => {
     const params = new URLSearchParams(queryString)
@@ -166,7 +166,7 @@ export function useDataTableUrlState({
     isNavigationPending,
     handleSortingChange,
     handlePaginationChange,
-    handleSearchChange,
+    handleSearchChange: handleSearchTermChange,
     handleFilterChange,
     clearFilters,
   }

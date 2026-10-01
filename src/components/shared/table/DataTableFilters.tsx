@@ -18,6 +18,27 @@ export type DataTableFilterDefinition =
   | { id: string; param: string; label: string; type: "multiple"; options: DataTableFilterOption[] }
   | { id: string; param: string; label: string; type: "range"; lowerLabel?: string; upperLabel?: string }
 
+export const dataTableFilter = {
+  single: (id: string, label: string, options: DataTableFilterOption[], param = id): DataTableFilterDefinition => ({
+    id, param, label, type: "single", options,
+  }),
+  multiple: (id: string, label: string, options: DataTableFilterOption[], param = id): DataTableFilterDefinition => ({
+    id, param, label, type: "multiple", options,
+  }),
+  range: (
+    id: string,
+    label: string,
+    options: { param?: string; lowerLabel?: string; upperLabel?: string } = {},
+  ): DataTableFilterDefinition => ({
+    id,
+    param: options.param ?? id,
+    label,
+    type: "range",
+    lowerLabel: options.lowerLabel,
+    upperLabel: options.upperLabel,
+  }),
+}
+
 export interface DataTableFiltersProps {
   filters: DataTableFilterDefinition[]
   values: Record<string, DataTableFilterValue>

@@ -11,7 +11,7 @@ import { IDoctor } from '@/types/doctor.types';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { doctorColumns } from './doctorsColumns';
-import { DataTableFilterDefinition } from '@/components/shared/table/DataTableFilters';
+import { dataTableFilter, DataTableFilterDefinition } from '@/components/shared/table/DataTableFilters';
 import { useDataTableUrlState } from '@/hooks/useDataTableUrlState';
 
 const doctorSortFields: Record<string, string> = {
@@ -56,35 +56,24 @@ const DoctorsTable = () => {
     const filterValues = tableUrl.filterValues;
 
     const doctorFilters: DataTableFilterDefinition[] = [
-        {
-            id: 'specialties',
-            param: 'specialties.specialtyId',
-            label: 'Specialties',
-            type: 'multiple',
-            options: (specialtiesResponse?.data ?? []).map((specialty) => ({
+        dataTableFilter.multiple(
+            'specialties',
+            'Specialties',
+            (specialtiesResponse?.data ?? []).map((specialty) => ({
                 label: specialty.title,
                 value: specialty.id,
             })),
-        },
-        {
-            id: 'gender',
-            param: 'gender',
-            label: 'Gender',
-            type: 'single',
-            options: [
+            'specialties.specialtyId',
+        ),
+        dataTableFilter.single('gender', 'Gender', [
                 { label: 'Male', value: 'MALE' },
                 { label: 'Female', value: 'FEMALE' },
                 { label: 'Other', value: 'OTHER' },
-            ],
-        },
-        {
-            id: 'appointmentFee',
-            param: 'appointmentFee',
-            label: 'Appointment fee',
-            type: 'range',
+        ]),
+        dataTableFilter.range('appointmentFee', 'Appointment fee', {
             lowerLabel: 'Minimum fee',
             upperLabel: 'Maximum fee',
-        },
+        }),
     ];
 
     const handleView = (doctor: IDoctor) => {
