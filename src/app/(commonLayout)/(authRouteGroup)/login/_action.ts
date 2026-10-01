@@ -43,10 +43,11 @@ export const loginAction = async (payload : ILoginPayload, redirectPath ?: strin
         }
         
     } catch (error : any) {
-        console.log(error, "error");
         if(error && typeof error === "object" && "digest" in error && typeof error.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")){
             throw error;
         }
+
+        console.error("Login action failed:", error);
 
         const errorMessage = error?.response?.data?.message
             ?? error?.response?.data?.error?.message
