@@ -39,3 +39,55 @@ export interface IDoctor {
         }
     }>
 }
+
+export interface IDoctorProfile extends Omit<IDoctor, "id" | "user"> {
+    id: string;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        role: string;
+        status: UserStatus;
+        emailVerified: boolean;
+        needPasswordChange: boolean;
+        image?: string | null;
+        createdAt: Date | string;
+    };
+    appointments: Array<{
+        id: string;
+        status: string;
+        paymentStatus: string;
+        createdAt: Date | string;
+        patient: {
+            id: string;
+            name: string;
+            email: string;
+            contactNumber?: string | null;
+            profilePhoto?: string | null;
+        };
+        schedule: {
+            id: string;
+            startDateTime: Date | string;
+            endDateTime: Date | string;
+        };
+        prescription: { id: string } | null;
+    }>;
+    doctorSchedules: Array<{
+        doctorId: string;
+        scheduleId: string;
+        isBooked: boolean;
+        schedule: {
+            id: string;
+            startDateTime: Date | string;
+            endDateTime: Date | string;
+        };
+    }>;
+    reviews: Array<{
+        id: string;
+        rating: number;
+        comment?: string | null;
+        createdAt: Date | string;
+        appointmentId: string;
+        patientId: string;
+    }>;
+}

@@ -3,6 +3,7 @@
 import DataTable from '@/components/shared/table/DataTable';
 import CreateDoctorDialog from './CreateDoctorDialog';
 import DeleteDoctorDialog from './DeleteDoctorDialog';
+import DoctorProfileDialog from './DoctorProfileDialog';
 import EditDoctorDialog from './EditDoctorDialog';
 import { getDoctors } from '@/services/doctor.services';
 import { getSpecialties } from '@/services/specialty.services';
@@ -15,6 +16,7 @@ import { doctorColumns } from './doctorsColumns';
 import { DataTableFilterDefinition, DataTableFilterValue, RangeOperator } from '@/components/shared/table/DataTableFilters';
 
 const DoctorsTable = () => {
+    const [doctorToView, setDoctorToView] = useState<IDoctor | null>(null);
     const [doctorToEdit, setDoctorToEdit] = useState<IDoctor | null>(null);
     const [doctorToDelete, setDoctorToDelete] = useState<IDoctor | null>(null);
     const router = useRouter();
@@ -245,7 +247,7 @@ const DoctorsTable = () => {
     }, [currentLimit, pathname, router, searchParams, setOptimisticPagination, startTransition]);
 
     const handleView = (doctor: IDoctor) => {
-        console.log("View doctor", doctor)
+        setDoctorToView(doctor)
     }
     const handleEdit = (doctor: IDoctor) => {
         setDoctorToEdit(doctor)
@@ -320,6 +322,13 @@ const DoctorsTable = () => {
                 }
             }
         />
+        {doctorToView && (
+            <DoctorProfileDialog
+                key={String(doctorToView.id)}
+                doctorId={String(doctorToView.id)}
+                onClose={() => setDoctorToView(null)}
+            />
+        )}
         {doctorToEdit && (
             <EditDoctorDialog
                 key={String(doctorToEdit.id)}
