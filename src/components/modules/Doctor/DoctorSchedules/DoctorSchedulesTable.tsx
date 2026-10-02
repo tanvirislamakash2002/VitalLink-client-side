@@ -9,7 +9,10 @@ import { IDoctorSchedule } from "@/types/schedule.types"
 import { useQuery } from "@tanstack/react-query"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
+import { useState } from "react"
 import BookDoctorSchedulesDialog from "./BookDoctorSchedulesDialog"
+import DoctorScheduleDetailsDialog from "./DoctorScheduleDetailsDialog"
+import DeleteMyDoctorScheduleDialog from "./DeleteMyDoctorScheduleDialog"
 
 const scheduleSortFields: Record<string, string> = {
 	startDateTime: "schedule.startDateTime",
@@ -48,6 +51,8 @@ const scheduleColumns: ColumnDef<IDoctorSchedule>[] = [
 ]
 
 const DoctorSchedulesTable = () => {
+	const [scheduleToView, setScheduleToView] = useState<IDoctorSchedule | null>(null)
+	const [scheduleToDelete, setScheduleToDelete] = useState<IDoctorSchedule | null>(null)
 	const tableUrl = useDataTableUrlState({ sortFields: scheduleSortFields })
 	const { data: scheduleResponse, isFetching, isError } = useQuery({
 		queryKey: ["my-doctor-schedules", tableUrl.queryParamsObject],
@@ -58,6 +63,7 @@ const DoctorSchedulesTable = () => {
 	const isTableLoading = isFetching || tableUrl.isNavigationPending
 
 	return (
+		<>
 		<div className="space-y-4">
 			{isError && (
 				<Alert variant="destructive">
@@ -78,8 +84,16 @@ const DoctorSchedulesTable = () => {
 				}}
 				isLoading={isTableLoading}
 				emptyMessage="You have not booked any schedules yet."
+				actions={{ onView: setScheduleToView, onDelete: setScheduleToDelete }}
 			/>
 		</div>
+		{scheduleToView && (
+			<DoctorScheduleDetailsDialog schedule={scheduleToView} onClose={() => setScheduleToView(null)} />
+		)}
+		{scheduleToDelete && (
+			<DeleteMyDoctorScheduleDialog schedule={scheduleToDelete} onClose={() => setScheduleToDelete(null)} />
+		)}
+		</>
 	)
 }
 

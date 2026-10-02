@@ -27,3 +27,14 @@ export async function bookDoctorSchedulesAction(scheduleIds: string[]): Promise<
     return { success: false, message: getErrorMessage(error, "Could not book the selected schedules.") }
   }
 }
+
+export async function deleteMyDoctorScheduleAction(scheduleId: string): Promise<DoctorScheduleActionResult> {
+  try {
+    const response = await httpClient.delete<void>(
+      `/doctor-schedules/delete-my-doctor-schedule/${encodeURIComponent(scheduleId)}`
+    )
+    return { success: true, message: response.message, data: undefined }
+  } catch (error) {
+    return { success: false, message: getErrorMessage(error, "Could not remove this schedule.") }
+  }
+}

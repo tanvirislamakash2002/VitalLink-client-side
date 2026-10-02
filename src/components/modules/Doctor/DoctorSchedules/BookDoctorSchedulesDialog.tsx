@@ -19,7 +19,7 @@ function formatTime(value: Date | string) {
 
 const BookDoctorSchedulesDialog = () => {
   const [open, setOpen] = useState(false)
-  const [selectedDate, setSelectedDate] = useState(() => format(new Date(), "yyyy-MM-dd"))
+  const [selectedDate, setSelectedDate] = useState("")
   const [selectedScheduleIds, setSelectedScheduleIds] = useState<Set<string>>(new Set())
   const [formError, setFormError] = useState<string | null>(null)
   const queryClient = useQueryClient()
@@ -35,17 +35,18 @@ const BookDoctorSchedulesDialog = () => {
   const availableSchedulesQuery = useQuery({
     queryKey: ["doctor-available-schedules", selectedDate],
     queryFn: () => {
-      const date = new Date(`${selectedDate}T00:00:00`)
-      const nextDate = addDays(date, 1)
-      const startDateTime = selectedDate === today ? new Date() : date
+      const now = new Date()
+      const date = selectedDate ? new Date(`${selectedDate}T00:00:00`) : now
+      const nextDate = selectedDate ? addDays(date, 1) : undefined
+      const startDateTime = date > now ? date : now
       const params = new URLSearchParams({
-        limit: "200",
+        limit: "1000",
         sortBy: "startDateTime",
         sortOrder: "asc",
         include: "doctorSchedules",
       })
       params.set("startDateTime[gte]", startDateTime.toISOString())
-      params.set("startDateTime[lt]", nextDate.toISOString())
+      if (nextDate) params.set("startDateTime[lt]", nextDate.toISOString())
       return getSchedules(params.toString())
     },
     enabled: open,
@@ -86,7 +87,7 @@ const BookDoctorSchedulesDialog = () => {
   return (
     <>
       <Button type="button" onClick={() => {
-        setSelectedDate(format(new Date(), "yyyy-MM-dd"))
+        setSelectedDate("")
         setSelectedScheduleIds(new Set())
         setFormError(null)
         setOpen(true)
@@ -101,7 +102,7 @@ const BookDoctorSchedulesDialog = () => {
           <DialogHeader className="relative pr-12">
             <DialogTitle>Book schedule slots</DialogTitle>
             <DialogDescription id="book-schedules-description">
-              Choose an available slot for today or a future date.
+              Browse upcoming slots or filter the list to a specific date.
             </DialogDescription>
             <Button
               type="button"
@@ -118,20 +119,32 @@ const BookDoctorSchedulesDialog = () => {
           </DialogHeader>
 
           <div className="space-y-4 overflow-y-auto px-6 py-5">
-            <div className="max-w-xs space-y-1.5">
-              <label htmlFor="doctor-schedule-date" className="text-sm font-medium">Schedule date</label>
-              <Input
-                id="doctor-schedule-date"
-                type="date"
-                min={today}
-                value={selectedDate}
-                onChange={(event) => {
-                  if (!event.target.value) return
-                  setSelectedDate(event.target.value)
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="max-w-xs flex-1 space-y-1.5">
+                <label htmlFor="doctor-schedule-date" className="text-sm font-medium">Filter by date</label>
+                <Input
+                  id="doctor-schedule-date"
+                  type="date"
+                  min={today}
+                  value={selectedDate}
+                  onChange={(event) => {
+                    setSelectedDate(event.target.value)
+                    setSelectedScheduleIds(new Set())
+                  }}
+                  disabled={isPending}
+                />
+              </div>
+              <Button
+                type="button"
+                variant={selectedDate ? "outline" : "secondary"}
+                onClick={() => {
+                  setSelectedDate("")
                   setSelectedScheduleIds(new Set())
                 }}
-                disabled={isPending}
-              />
+                disabled={!selectedDate || isPending}
+              >
+                All upcoming
+              </Button>
             </div>
 
             {formError && <Alert variant="destructive"><AlertDescription>{formError}</AlertDescription></Alert>}
@@ -143,7 +156,7 @@ const BookDoctorSchedulesDialog = () => {
             {isLoading ? (
               <p className="py-8 text-center text-sm text-muted-foreground">Loading available schedules...</p>
             ) : !hasError && availableSchedules.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">No remaining schedule slots for this date.</p>
+              <p className="py-8 text-center text-sm text-muted-foreground">No remaining schedule slots found.</p>
             ) : !hasError && (
               <div role="group" aria-label="Available schedule slots" className="max-h-72 space-y-2 overflow-y-auto">
                 {availableSchedules.map((schedule) => {
