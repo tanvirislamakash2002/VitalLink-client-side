@@ -1,11 +1,8 @@
-import React from 'react'
+import DoctorDetailsPage from "@/components/modules/Consultation/DoctorDetailsPage"
 
-function ConsultationDoctorByIdPage() {
-  return (
-    <div>
-      Consultation Doctor page
-    </div>
-  )
+async function ConsultationDoctorByIdPage({ params }: PageProps<"/consultation/doctor/[id]">) {
+  const { id } = await params
+  return <DoctorDetailsPage doctorId={id} />
 }
 
 export default ConsultationDoctorByIdPage

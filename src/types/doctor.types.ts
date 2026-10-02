@@ -1,4 +1,4 @@
-enum Gender {
+export enum Gender {
     MALE = "MALE",
     FEMALE = "FEMALE",
     OTHER = "OTHER"
@@ -11,7 +11,7 @@ export enum UserStatus {
 }
 
 export interface IDoctor {
-    id: number;
+    id: string;
     name: string;
     email: string;
     profilePhoto?: string;
@@ -38,6 +38,26 @@ export interface IDoctor {
             icon: string;
         }
     }>
+}
+
+export interface IPublicDoctor extends Omit<IDoctor, "user" | "specialties" | "profilePhoto" | "contactNumber" | "address" | "createdAt"> {
+    profilePhoto?: string | null;
+    contactNumber?: string | null;
+    address?: string | null;
+    createdAt: Date | string;
+    specialties: Array<{
+        specialty: {
+            id: string;
+            title: string;
+            icon: string | null;
+        }
+    }>;
+    reviews: Array<{
+        id: string;
+        rating: number;
+        comment: string | null;
+        createdAt: Date | string;
+    }>;
 }
 
 export interface IDoctorProfile extends Omit<IDoctor, "id" | "user"> {

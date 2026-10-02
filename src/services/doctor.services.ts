@@ -1,6 +1,6 @@
 "use server"
 import { httpClient } from "@/lib/axios/httpClient"
-import { IDoctor, IDoctorProfile } from "@/types/doctor.types"
+import { IDoctor, IDoctorProfile, IPublicDoctor } from "@/types/doctor.types"
 
 
 
@@ -21,4 +21,13 @@ export const getDoctorById = async (doctorId: string) => {
         console.log("Error fetching doctor profile:", error)
         throw error
     }
+}
+
+export const getPublicDoctorById = async (doctorId: string) => {
+    return httpClient.get<IPublicDoctor | null>(`/doctors/public/${encodeURIComponent(doctorId)}`)
+}
+
+export const getPublicDoctors = async (queryString: string) => {
+    const endpoint = queryString ? `/doctors/public?${queryString}` : "/doctors/public"
+    return httpClient.get<IPublicDoctor[]>(endpoint)
 }
