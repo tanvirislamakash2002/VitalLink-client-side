@@ -24,6 +24,17 @@ export interface ISchedule {
   }>
 }
 
+export interface IDoctorSchedule {
+  doctorId: string
+  scheduleId: string
+  isBooked: boolean
+  schedule: {
+    id: string
+    startDateTime: Date | string
+    endDateTime: Date | string
+  }
+}
+
 export interface ScheduleFormPayload {
   startDate: string
   endDate: string

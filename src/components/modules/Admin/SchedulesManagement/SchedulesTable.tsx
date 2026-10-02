@@ -26,12 +26,6 @@ function formatDateTime(value: Date | string) {
 
 const scheduleColumns: ColumnDef<ISchedule>[] = [
 	{
-		id: "id",
-		accessorKey: "id",
-		header: "Schedule ID",
-		cell: ({ row }) => <span className="font-mono text-xs">{row.original.id.slice(0, 8)}</span>,
-	},
-	{
 		id: "startDateTime",
 		accessorKey: "startDateTime",
 		header: "Starts",
