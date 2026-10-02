@@ -1,11 +1,7 @@
-import React from 'react'
+import PaymentSuccessStatus from "@/components/modules/Appointment/PaymentSuccessStatus"
 
 function PaymentSuccessPage() {
-  return (
-    <div>
-      
-    </div>
-  )
+  return <PaymentSuccessStatus />
 }
 
 export default PaymentSuccessPage

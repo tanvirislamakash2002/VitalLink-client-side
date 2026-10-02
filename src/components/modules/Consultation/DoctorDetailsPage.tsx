@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { getPublicDoctorById } from "@/services/doctor.services"
+import BookAppointmentDialog from "@/components/modules/Consultation/BookAppointmentDialog"
 import { IPublicDoctor } from "@/types/doctor.types"
 import { useQuery } from "@tanstack/react-query"
 import { format } from "date-fns"
@@ -43,6 +44,9 @@ function DoctorDetails({ doctor }: { doctor: IPublicDoctor }) {
                     <Star aria-hidden="true" className="size-5 fill-amber-400 text-amber-400" />
                     <span className="text-lg font-semibold">{doctor.averageRating > 0 ? doctor.averageRating.toFixed(1) : "New"}</span>
                     <span className="text-sm text-muted-foreground">({doctor.reviews.length} reviews)</span>
+                </div>
+                <div className="md:col-start-2">
+                    <BookAppointmentDialog doctorId={doctor.id} doctorName={doctor.name} />
                 </div>
             </section>
 

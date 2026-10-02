@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query"
 import { ArrowRight, Search, Star } from "lucide-react"
 import Link from "next/link"
 import { useDataTableUrlState } from "@/hooks/useDataTableUrlState"
+import BookAppointmentDialog from "./BookAppointmentDialog"
 
 const doctorSortFields: Record<string, string> = {
     name: "name",
@@ -69,12 +70,15 @@ function DoctorCard({ doctor }: { doctor: IPublicDoctor }) {
                     </div>
                 </dl>
                 <div className="mt-auto border-t pt-4">
-                    <Link
-                        href={`/consultation/doctor/${encodeURIComponent(doctor.id)}`}
-                        className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                    >
-                        View details <ArrowRight aria-hidden="true" className="size-4" />
-                    </Link>
+                    <div className="flex flex-wrap gap-2">
+                        <Link
+                            href={`/consultation/doctor/${encodeURIComponent(doctor.id)}`}
+                            className="inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium hover:bg-muted"
+                        >
+                            View details <ArrowRight aria-hidden="true" className="size-4" />
+                        </Link>
+                        <BookAppointmentDialog doctorId={doctor.id} doctorName={doctor.name} />
+                    </div>
                 </div>
             </div>
         </article>
