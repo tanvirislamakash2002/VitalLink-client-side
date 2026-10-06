@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server"
 
-import { queryRagService } from "@/services/rag.services"
+import { ingestDoctorService, queryRagService } from "@/services/rag.services"
 
 export const queryRagAction = async (query: string) => {
     try {
@@ -35,6 +35,8 @@ export const queryRagAction = async (query: string) => {
                     answer = "I couldn't find any doctors matching your query. Please try another query."
                 }
             }
+        } else {
+            answer = JSON.stringify(answer, null, 2)
         }
 
         const sources = 100 - Number(response?.data?.sources[0]?.similarity) * 100
@@ -46,5 +48,42 @@ export const queryRagAction = async (query: string) => {
         }
     } catch (error) {
         console.log(error)
+        return {
+            success: false,
+            error: "Failed to reach the AI Assistant. Please check your connection and try again."
+        }
+    }
+}
+
+export const ingestDoctorsAction = async () => {
+    try {
+        const response = await ingestDoctorService()
+
+        return {
+            success: true,
+            indexedCount: response.data.indexedCount,
+            message:
+                response.data.message ??
+                response.message ??
+                "Doctors data synced successfully."
+        }
+    } catch (error) {
+
+        console.log(error)
+        return {
+            success: false,
+            error: "Failed to sync doctor data. Please try again."
+        }
+    }
+}
+
+export const getUserRoleAction = async () => {
+    try {
+        const { getUserInfo } = await import("@/services/auth.services")
+        const userInfo = await getUserInfo();
+        return userInfo?.role ?? null
+    } catch (error) {
+        console.log(error)
+        return null
     }
 }
