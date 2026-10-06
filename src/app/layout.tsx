@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProviders from "../providers/QueryProvider";
-import RagChatbotWidget from "@/components/shared/RagChatbotWidget";
+import RagChatbotWidget from "@/components/RagChatbotWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

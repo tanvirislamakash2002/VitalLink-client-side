@@ -26,25 +26,30 @@ export const queryRagAction = async (query: string) => {
                     answer = `I found ${doctors.length} doctors who may help you:\n\n` +
                         doctors.map((d: any, i: number) => {
                             let text = ``;
-                            if (d.name) text += `${i + 1}.**${d.name}**\n`
+                            if (d.name) text += `${i + 1}. **${d.name}**\n`
                             if (d.specialty) text += `Specialization: **${d.specialty}**\n`
-                            if (d.reason) text += `Why:${d.name}\n`
-                            return text + "\n"
-                        })
+                            if (d.reason) text += `Why: ${d.reason || d.name}\n`
+                            return text
+                        }).join("\n")
                 } else {
                     answer = "I couldn't find any doctors matching your query. Please try another query."
                 }
+            } else {
+                answer = JSON.stringify(answer, null, 2)
             }
-        } else {
-            answer = JSON.stringify(answer, null, 2)
         }
 
-        const sources = 100 - Number(response?.data?.sources[0]?.similarity) * 100
+        const similarity = response?.data?.sources?.[0]?.similarity
+        const sources = typeof similarity === "number"
+            ? `${Math.max(0, 100 - Number(similarity) * 100).toFixed(2)}% matched`
+            : response?.data?.sources?.length
+                ? `${response.data.sources.length} sources matched`
+                : null
 
         return {
             success: true,
             answer: answer as string,
-            sources: `${sources.toFixed(2)}% matched`
+            sources: sources ?? undefined
         }
     } catch (error) {
         console.log(error)
